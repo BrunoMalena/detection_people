@@ -3,53 +3,42 @@ import cv2
 
 model = YOLO('yolov8m.pt')
 
-video = cv2.VideoCapture('IMG_1214.mp4')
+video = cv2.VideoCapture('IMG_1240.mp4')
 
-frame6 = (130, 310)  
-frame7 = (460, 300)  
-frame8 = (400, 260)  
-frame9 = (100, 230)  
+line1 = [(181, 252), (379, 94)]
+line2 = [(265, 328), (472, 123)]
+line3 = [(223,291) , (423,111)]
 
-def pessoa_na_faixa(pessoa_box, faixa_box):
-    
-    x1, y1, x2, y2 = pessoa_box
-    fx1, fy1, fx2, fy2 = faixa_box
-    if x2 < fx1 or fx2 < x1 or y2 < fy1 or fy2 < y1:
-        return False
-    else:
-        return True
+def ccw(A, B, C):
+    return (C[1] - A[1]) * (B[0] - A[0]) > (B[1] - A[1]) * (C[0] - A[0])
+
+def intersect(A, B, C, D):
+    return ccw(A, C, D) != ccw(B, C, D) and ccw(A, B, C) != ccw(A, B, D)
+
+def pessoa_na_faixa(pessoa_box, line):
+    diag_line = (pessoa_box[:2].astype(int), pessoa_box[2:].astype(int))
+    intercept = intersect(diag_line[0], diag_line[1], line[0], line[1])
+    return intercept
 
 while video.isOpened():
     ret, frame = video.read()
-
     if not ret:
         break
 
     resultados = model(frame, classes=[0], verbose=False)
 
-    # frame = cv2.circle(frame, frame6, 5, (255, 0, 0), -1)
-    # frame = cv2.circle(frame, frame7, 5, (255, 0, 0), -1)
-    # frame = cv2.circle(frame, frame8, 5, (255, 0, 0), -1)
-    # frame = cv2.circle(frame, frame9, 5, (255, 0, 0), -1)
-
-    # frame1 = cv2.line(frame, frame6, frame9, (0, 255, 0), 2)
-    # frame2 = cv2.line(frame, frame8, frame9, (0, 255, 0), 2)
-    # frame3 = cv2.line(frame, frame8, frame7, (0, 255, 0), 2)
-    # frame4 = cv2.line(frame, frame6, frame7, (0, 255, 0), 2)
-
-    x_min = min(frame6[0], frame7[0], frame8[0], frame9[0])
-    x_max = max(frame6[0], frame7[0], frame8[0], frame9[0])
-    y_min = min(frame6[1], frame7[1], frame8[1], frame9[1])
-    y_max = max(frame6[1], frame7[1], frame8[1], frame9[1])
-
-    faixa_pedestres = (x_min, y_min, x_max, y_max) 
-
     for pessoa_box in resultados:
         for box in pessoa_box:
-            b = box.boxes.xyxy[0].tolist()
-            x1, y1, x2, y2 = int(b[0]), int(b[1]), int(b[2]), int(b[3])
-            if pessoa_na_faixa((x1, y1, x2, y2), faixa_pedestres):
-                cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 255), 2)
+            b = box.boxes.xyxy[0].cpu().numpy()
+            if pessoa_na_faixa(b, line1):
+                cv2.rectangle(frame, b[:2].astype(int), b[2:].astype(int), (0, 0, 255), 2)
+            if pessoa_na_faixa(b, line2):
+                cv2.rectangle(frame, b[:2].astype(int), b[2:].astype(int), (0, 0, 255), 2)
+            if pessoa_na_faixa(b, line3):
+                cv2.rectangle(frame, b[:2].astype(int), b[2:].astype(int), (0, 0, 255), 2)
+            # cv2.line(frame, line1[0], line1[1], (255, 0, 0), 2)
+            # cv2.line(frame, line2[0], line2[1], (255, 0, 0), 2)
+            # cv2.line(frame, line3[0], line3[1], (255, 0, 0), 2)
     cv2.imshow('Video', frame)
 
     if cv2.waitKey(1) == ord('q'):
