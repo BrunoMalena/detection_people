@@ -40,9 +40,6 @@ while video.isOpened():
                 cv2.putText(frame, "Entrou!!", (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 255), 2)
                 contador_pessoas += 1
         cv2.putText(frame, "Contagem: " + str(contador_pessoas), (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 255), 2)
-
-            # if contador_pessoas != contador_anterior:
-            #     print("Número de pessoas na faixa de pedestres:", contador_pessoas)
     cv2.imshow('Video', frame)
 
     if cv2.waitKey(1) == ord('q'):
