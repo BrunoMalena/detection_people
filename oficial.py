@@ -29,9 +29,6 @@ while video.isOpened():
 
     contador_pessoas = 0
 
-    contador_pessoas = 0
-    contador_anterior = 0
-
     for pessoa_box in resultados:
         for box in pessoa_box:
             b = box.boxes.xyxy[0].cpu().numpy()
