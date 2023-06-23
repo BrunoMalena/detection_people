@@ -27,18 +27,22 @@ while video.isOpened():
 
     resultados = model(frame, classes=[0], verbose=False)
 
+    contador_pessoas = 0
+
+    contador_pessoas = 0
+    contador_anterior = 0
+
     for pessoa_box in resultados:
         for box in pessoa_box:
             b = box.boxes.xyxy[0].cpu().numpy()
-            if pessoa_na_faixa(b, line1):
+            if pessoa_na_faixa(b, line1) or pessoa_na_faixa(b, line2) or pessoa_na_faixa(b, line3):
                 cv2.rectangle(frame, b[:2].astype(int), b[2:].astype(int), (0, 0, 255), 2)
-            if pessoa_na_faixa(b, line2):
-                cv2.rectangle(frame, b[:2].astype(int), b[2:].astype(int), (0, 0, 255), 2)
-            if pessoa_na_faixa(b, line3):
-                cv2.rectangle(frame, b[:2].astype(int), b[2:].astype(int), (0, 0, 255), 2)
-            # cv2.line(frame, line1[0], line1[1], (255, 0, 0), 2)
-            # cv2.line(frame, line2[0], line2[1], (255, 0, 0), 2)
-            # cv2.line(frame, line3[0], line3[1], (255, 0, 0), 2)
+                cv2.putText(frame, "Entrou!!", (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 255), 2)
+                contador_pessoas += 1
+        cv2.putText(frame, "Contagem: " + str(contador_pessoas), (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 255), 2)
+
+            # if contador_pessoas != contador_anterior:
+            #     print("Número de pessoas na faixa de pedestres:", contador_pessoas)
     cv2.imshow('Video', frame)
 
     if cv2.waitKey(1) == ord('q'):
